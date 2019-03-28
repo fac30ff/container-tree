@@ -1,9 +1,6 @@
 package com.globallogic.test.tree;
 
-import java.util.List;
-import java.util.function.Predicate;
-
-public final class GeneralTree<T> implements SearchEngineInterface<T>{
+public final class GeneralTree<T> {
     private final GeneralNode<T> zeroNode = new ContainerNode<>(null);
 
     public GeneralNode<T> phantomPoint() {
@@ -13,20 +10,5 @@ public final class GeneralTree<T> implements SearchEngineInterface<T>{
     @Override
     public String toString() {
         return "";
-    }
-
-    @Override
-    public T subTree(T t) {
-        return null;
-    }
-
-    @Override
-    public List<T> filter(Predicate<T> t) {
-        return null;
-    }
-
-    @Override
-    public T search(T t) {
-        return null;
     }
 }
