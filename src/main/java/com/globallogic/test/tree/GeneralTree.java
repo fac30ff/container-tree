@@ -7,6 +7,11 @@ public final class GeneralTree<T> {
         return zeroNode;
     }
 
+    public GeneralNode<T> subtree(T t) {
+        return new GeneralTree<T>().phantomPoint();
+    }
+
+
     @Override
     public String toString() {
         return "";

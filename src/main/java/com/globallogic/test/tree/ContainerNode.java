@@ -80,8 +80,9 @@ public final class ContainerNode<T> implements GeneralNode<T> {
         return parent;
     }
 
+    @Override
     public void add(GeneralNode<T> node) throws ThisNodeAlreadyAncestorOfCurrentNodeException {
-        if(isAncestor(node) && isDescendant(node)) {
+        if (isAncestor(node) && isDescendant(node)) {
             throw new ThisNodeAlreadyAncestorOfCurrentNodeException();
         }
         if (children == null) {
@@ -91,6 +92,11 @@ public final class ContainerNode<T> implements GeneralNode<T> {
             children.add(node);
             size = getChildrenCount();
         }
+    }
+
+    @Override
+    public GeneralNode<T> add(T value) {
+        return this;
     }
 
     @Override
@@ -120,7 +126,7 @@ public final class ContainerNode<T> implements GeneralNode<T> {
     @Override
     public void remove(GeneralNode<T> node) throws ThisIsNoChildException {
         Objects.requireNonNull(node, new CannotAcceptNullException().getMessage());
-        if(children.contains(node)) {
+        if (children.contains(node)) {
             children.remove(node);
         } else {
             throw new ThisIsNoChildException();
@@ -154,18 +160,20 @@ public final class ContainerNode<T> implements GeneralNode<T> {
         return getParent() == null;
     }
 
+    @Override
     public boolean isAncestor(GeneralNode<T> node) {
         if (node == null) {
             return false;
         }
         for (GeneralNode<T> ancestor = this; ancestor.getParent() != null; ancestor = ancestor.getParent()) {
-            if(ancestor == node) {
+            if (ancestor == node) {
                 return true;
             }
         }
         return false;
     }
 
+    @Override
     public boolean isDescendant(GeneralNode<T> node) {
         if (node == null) {
             return false;
