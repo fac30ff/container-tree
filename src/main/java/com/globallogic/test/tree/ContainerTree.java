@@ -8,16 +8,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class Iteration7<T> {
+public class ContainerTree<T> {
     private Container<T> root;
 
-    public Iteration7() {
+    public ContainerTree() {
         root = new Container<>();
     }
 
-    public void insert(T element) {
-        Container<T> current = root;
-
+    public boolean insert(T parent, T element) throws AddingChildIsProhibitedForThisNodeException {
+        if (parent == null || element == null) {
+            return false;
+        }
+        if (root == null) {
+            return add(element);
+        }
+        Container<T> p = traverseToMainRoot(root, parent);
+        if (p != null) {
+            p.addChild(element);
+            return true;
+        }
+        return false;
     }
 
     public boolean isEmpty() {
@@ -29,12 +39,16 @@ public class Iteration7<T> {
         if (root == null) {
             return 0;
         }
-        count = count + size(root);
+        count = traverse(root, count);
         return count;
     }
 
-    private void traverse(Container<T> current) {
-        current.children.forEach(this::traverse);
+    private int traverse(Container<T> current, int count) {
+        for (Container<T> c : current.children) {
+            count++;
+            traverse(c, count);
+        }
+        return count;
     }
 
     private int size(Container<T> current) {
@@ -71,13 +85,13 @@ public class Iteration7<T> {
     }
 
     public T remove(T element) {
-        if(root == null) {
+        if (root == null) {
             return null;
         }
         if (root.object.equals(element)) {
             root.removeSelf();
         } else {
-            if(root.parent == null) {
+            if (root.parent == null) {
                 root = traverseLevelOrder(root, element);
                 root.removeSelf();
             } else {
@@ -101,7 +115,7 @@ public class Iteration7<T> {
         containers.add(root);
         while (!containers.isEmpty()) {
             Container<T> container = containers.remove();
-            if(container.object.equals(element)) {
+            if (container.object.equals(element)) {
                 return container;
             }
             if (container.children != null) {
@@ -110,8 +124,6 @@ public class Iteration7<T> {
         }
         return null;
     }
-
-
 
 
     private static class Container<T> {
@@ -193,7 +205,7 @@ public class Iteration7<T> {
         }
 
         void addChild(T element) {
-
+            children.add(new Container<>(this, element));
         }
 
         boolean isAncestor(Container<T> node) {
@@ -216,7 +228,7 @@ public class Iteration7<T> {
         }
 
         boolean allowAddChildren() {
-            return maxChildren < children.size();
+            return maxChildren <= children.size();
         }
 
         Container<T> removeSelf() {
