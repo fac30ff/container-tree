@@ -1,93 +1,214 @@
 package com.globallogic.test.tree;
 
+import com.globallogic.test.tree.exception.AddingChildIsProhibitedForThisNodeException;
+import com.globallogic.test.tree.exception.NoElementFoundException;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class Iteration7<T> {
-  private Container<T> current;
+    private Container<T> root;
 
-  public boolean add(T element) {
-    if (current == null) {
-      current = new Container<>(element);
-    } else {
-      if (current.getChildren().contains(element)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private static class Container<T> {
-    private Container<T> parent;
-    private List<Container<T>> children = new ArrayList<>();
-    private T object;
-    private int maxChildren = Integer.MAX_VALUE;
-    private int size;
-
-    public Container() {
-      this(null);
+    public Iteration7() {
+        root = new Container<>();
     }
 
-    public Container(T object) {
-      this.object = object;
-      this.parent = null;
+    public void insert(T element) {
+        Container<T> current = root;
+
     }
 
-    public Container(Container<T> parent, int maxChildren) {
-      this.object = null;
-      this.parent = parent;
-      this.maxChildren = maxChildren;
+    public boolean isEmpty() {
+        return root == null;
     }
 
-    public Container(T object, int maxChildren) {
-      this(object);
-      this.maxChildren = maxChildren;
+    public int size() {
+        int count = 0;
+        if (root == null) {
+            return 0;
+        }
+        count = count + size(root);
+        return count;
     }
 
-    public Container(Container<T> parent, T object, int maxChildren) {
-      this.object = object;
-      this.parent = parent;
-      this.maxChildren = maxChildren;
+    private void traverse(Container<T> current) {
+        current.children.forEach(this::traverse);
     }
 
-    public Container<T> getParent() {
-      return parent;
+    private int size(Container<T> current) {
+        return current == null ? 0 : current.children.size();
     }
 
-    public void setParent(Container<T> parent) {
-      this.parent = parent;
+    public boolean contains(T element) {
+
     }
 
-    public List<Container<T>> getChildren() {
-      return children;
+    private boolean contains(Container<T> current, T element) {
+        if (current == null) {
+            return false;
+        }
+
+        if (element.equals(current.object)) {
+            return true;
+        }
+
+
     }
 
-    public void setChildren(List<Container<T>> children) {
-      this.children = children;
+
+    public boolean add(T element) throws AddingChildIsProhibitedForThisNodeException {
+        root = add(root, element);
+        return true;
     }
 
-    public T getObject() {
-      return object;
+    private Container<T> add(Container<T> current, T element) throws AddingChildIsProhibitedForThisNodeException {
+        if (current == null) {
+            return new Container<>(element);
+        }
+        if (current.allowAddChildren()) {
+            current.children.add(new Container<>(current, element));
+        } else {
+            throw new AddingChildIsProhibitedForThisNodeException();
+        }
+        return current;
     }
 
-    public void setObject(T object) {
-      this.object = object;
+    public T remove(T element) throws NoElementFoundException {
+        if(root == null) {
+            throw new NoElementFoundException();
+        }
+
+        return element;
     }
 
-    public int getMaxChildren() {
-      return maxChildren;
+    private Container<T> traverseLevelOrder(Container<T> current) throws NoElementFoundException {
+        if (current == null) {
+            throw new NoElementFoundException();
+        }
+        Queue<Container<T>> containers = new LinkedList<>();
+        containers.add(root);
+        while (!containers.isEmpty()) {
+            Container<T> container = containers.remove();
+            System.out.println(" " + container.object);
+            if (container.children != null) {
+                containers.addAll(container.children);
+            }
+        }
     }
 
-    public void setMaxChildren(int maxChildren) {
-      this.maxChildren = maxChildren;
-    }
 
-    public int getSize() {
-      return size;
-    }
 
-    private void setSize(int size) {
-      this.size = size;
+
+    private static class Container<T> {
+        private Container<T> parent;
+        private List<Container<T>> children = new ArrayList<>();
+        private T object;
+        private int maxChildren = Integer.MAX_VALUE;
+        private int size;
+
+        Container() {
+            this(null);
+        }
+
+        Container(T object) {
+            this.object = object;
+            this.parent = null;
+        }
+
+        Container(Container<T> parent, T object) {
+            this.parent = parent;
+            this.object = object;
+        }
+
+        Container(Container<T> parent, int maxChildren) {
+            this.object = null;
+            this.parent = parent;
+            this.maxChildren = maxChildren;
+        }
+
+        Container(T object, int maxChildren) {
+            this(object);
+            this.maxChildren = maxChildren;
+        }
+
+        Container(Container<T> parent, T object, int maxChildren) {
+            this.object = object;
+            this.parent = parent;
+            this.maxChildren = maxChildren;
+        }
+
+        Container<T> getParent() {
+            return parent;
+        }
+
+        void setParent(Container<T> parent) {
+            this.parent = parent;
+        }
+
+        List<Container<T>> getChildren() {
+            return children;
+        }
+
+        void setChildren(List<Container<T>> children) {
+            this.children = children;
+        }
+
+        T getObject() {
+            return object;
+        }
+
+        void setObject(T object) {
+            this.object = object;
+        }
+
+        int getMaxChildren() {
+            return maxChildren;
+        }
+
+        void setMaxChildren(int maxChildren) {
+            this.maxChildren = maxChildren;
+        }
+
+        int getSize() {
+            return size;
+        }
+
+        private void setSize(int size) {
+            this.size = size;
+        }
+
+        void addChild(T element) {
+
+        }
+
+        boolean isAncestor(Container<T> node) {
+            if (node == null) {
+                return false;
+            }
+            for (Container<T> ancestor = this; ancestor.getParent() != null; ancestor = ancestor.getParent()) {
+                if (ancestor == node) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        boolean isDescendant(Container<T> node) {
+            if (node == null) {
+                return false;
+            }
+            return node.isAncestor(this);
+        }
+
+        boolean allowAddChildren() {
+            return maxChildren < children.size();
+        }
+
+        Container<T> removeSelf() {
+            this.parent = null;
+            return this;
+        }
     }
-  }
 }
