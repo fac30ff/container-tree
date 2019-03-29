@@ -1,9 +1,9 @@
 package com.globallogic.test.tree;
 
 import com.globallogic.test.tree.exception.AddingChildIsProhibitedForThisNodeException;
-import com.globallogic.test.tree.exception.NoElementFoundException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -42,19 +42,14 @@ public class Iteration7<T> {
     }
 
     public boolean contains(T element) {
-
+        return contains(root, element);
     }
 
     private boolean contains(Container<T> current, T element) {
         if (current == null) {
             return false;
         }
-
-        if (element.equals(current.object)) {
-            return true;
-        }
-
-
+        return traverseToMainRoot(current, element) != null;
     }
 
 
@@ -75,27 +70,45 @@ public class Iteration7<T> {
         return current;
     }
 
-    public T remove(T element) throws NoElementFoundException {
+    public T remove(T element) {
         if(root == null) {
-            throw new NoElementFoundException();
+            return null;
         }
-
+        if (root.object.equals(element)) {
+            root.removeSelf();
+        } else {
+            if(root.parent == null) {
+                root = traverseLevelOrder(root, element);
+                root.removeSelf();
+            } else {
+                root = traverseToMainRoot(root, element);
+                root.removeSelf();
+            }
+        }
         return element;
     }
 
-    private Container<T> traverseLevelOrder(Container<T> current) throws NoElementFoundException {
-        if (current == null) {
-            throw new NoElementFoundException();
+    private Container<T> traverseToMainRoot(Container<T> current, T element) {
+        while (current.hasParent()) {
+            current = current.getParent();
         }
+        current = traverseLevelOrder(current, element);
+        return current;
+    }
+
+    private Container<T> traverseLevelOrder(Container<T> current, T element) {
         Queue<Container<T>> containers = new LinkedList<>();
         containers.add(root);
         while (!containers.isEmpty()) {
             Container<T> container = containers.remove();
-            System.out.println(" " + container.object);
+            if(container.object.equals(element)) {
+                return container;
+            }
             if (container.children != null) {
                 containers.addAll(container.children);
             }
         }
+        return null;
     }
 
 
@@ -207,8 +220,21 @@ public class Iteration7<T> {
         }
 
         Container<T> removeSelf() {
+            Container<T> temp = this;
             this.parent = null;
-            return this;
+            this.object = null;
+            removeChild(this.children);
+            return temp;
+        }
+
+        private void removeChild(List<Container<T>> children) {
+            if (children != null && children.isEmpty()) {
+                children.forEach(e -> removeChild(Collections.singletonList(e.removeSelf())));
+            }
+        }
+
+        boolean hasParent() {
+            return parent != null;
         }
     }
 }
