@@ -1,7 +1,7 @@
 package com.globallogic.test.tree;
 
-import com.globallogic.test.tree.eventmanagment.ObservableContainer;
-import com.globallogic.test.tree.eventmanagment.constants.TreeEvent;
+import com.globallogic.test.tree.management.event.constants.TreeEvent;
+import com.globallogic.test.tree.management.event.ObservableContainer;
 import com.globallogic.test.tree.exception.AddingChildIsProhibitedForThisNodeException;
 
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.function.Predicate;
 
 public class ContainerTree<T> extends ObservableContainer<T> {
   private Container<T> root;
@@ -252,6 +253,24 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
     boolean hasParent() {
       return parent != null;
+    }
+  }
+
+  private class ContainerSearchEngine<T> implements SearchEngineInterface<T> {
+
+    @Override
+    public T subTree(T t) {
+      return null;
+    }
+
+    @Override
+    public List<T> filter(Predicate<T> t) {
+      return null;
+    }
+
+    @Override
+    public T search(T t) {
+      return null;
     }
   }
 }
