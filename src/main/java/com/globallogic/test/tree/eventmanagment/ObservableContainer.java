@@ -1,4 +1,6 @@
-package com.globallogic.test.tree;
+package com.globallogic.test.tree.eventmanagment;
+
+import com.globallogic.test.tree.eventmanagment.constants.TreeEvent;
 
 import java.util.ArrayList;
 import java.util.List;

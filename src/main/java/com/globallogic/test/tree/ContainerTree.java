@@ -1,5 +1,7 @@
 package com.globallogic.test.tree;
 
+import com.globallogic.test.tree.eventmanagment.ObservableContainer;
+import com.globallogic.test.tree.eventmanagment.constants.TreeEvent;
 import com.globallogic.test.tree.exception.AddingChildIsProhibitedForThisNodeException;
 
 import java.util.ArrayList;

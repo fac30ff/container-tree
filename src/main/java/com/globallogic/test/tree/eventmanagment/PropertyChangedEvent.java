@@ -1,4 +1,6 @@
-package com.globallogic.test.tree;
+package com.globallogic.test.tree.eventmanagment;
+
+import com.globallogic.test.tree.eventmanagment.constants.TreeEvent;
 
 public class PropertyChangedEvent<T> {
   private T source;
