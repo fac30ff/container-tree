@@ -19,6 +19,10 @@ public class ContainerTree<T> extends ObservableContainer<T> {
     root = new Container<>();
   }
 
+  public ContainerTree(Container<T> t) {
+    this.root = t;
+  }
+
   public boolean insert(T parent, T element) throws AddingChildIsProhibitedForThisNodeException {
     if (parent == null || element == null) {
       propertyChanged(null, TreeEvent.FailedToInsertContainer, null);
@@ -130,6 +134,29 @@ public class ContainerTree<T> extends ObservableContainer<T> {
       }
     }
     return null;
+  }
+
+  public ContainerTree<T> subTree(T element) {
+    if(root == null) {
+      return null;
+    }
+    if (root.getObject().equals(element)) {
+      return this;
+    }
+    Container<T> p = traverseToMainRoot(root, element);
+    if (p == null) {
+      return null;
+    }
+    p.setParent(null);
+    return new ContainerTree<>(p);
+  }
+
+  private List<Container<T>> allChildren(T element) {
+    return Collections.emptyList();
+  }
+
+  private List<Container<T>> allChildren(Container<T> current, List<Container<T>> list) {
+    return Collections.emptyList();
   }
 
 
@@ -260,8 +287,11 @@ public class ContainerTree<T> extends ObservableContainer<T> {
   private class ContainerSearchEngine<T> implements SearchEngineInterface<T> {
 
     @Override
-    public T subTree(T t) {
-      return null;
+    public List<T> subTree(T t) {
+      ArrayList<T> list = new ArrayList<>();
+      List<Container<T>> containers = allChildren(t);
+      containers.forEach(e -> list.add(e.getObject()));
+      return list;
     }
 
     @Override
