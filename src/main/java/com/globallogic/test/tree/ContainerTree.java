@@ -1,7 +1,8 @@
 package com.globallogic.test.tree;
 
-import com.globallogic.test.tree.management.event.constants.TreeEvent;
 import com.globallogic.test.tree.management.event.ObservableContainer;
+import com.globallogic.test.tree.management.search.SearchEngineInterface;
+import com.globallogic.test.tree.management.event.constants.TreeEvent;
 import com.globallogic.test.tree.exception.AddingChildIsProhibitedForThisNodeException;
 
 import java.util.ArrayList;
