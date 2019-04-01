@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class ContainerTree<T> {
+public class ContainerTree<T> extends ObservableContainer<T> {
   private Container<T> root;
 
   public ContainerTree() {
@@ -17,13 +17,16 @@ public class ContainerTree<T> {
 
   public boolean insert(T parent, T element) throws AddingChildIsProhibitedForThisNodeException {
     if (parent == null || element == null) {
+      propertyChanged(null, TreeEvent.FailedToInsertContainer, null);
       return false;
     }
     if (root == null) {
+      propertyChanged(element, TreeEvent.NewRootContainerAdded, element);
       return add(element);
     }
     Container<T> p = traverseToMainRoot(root, parent);
     if (p != null) {
+      propertyChanged(parent, TreeEvent.NewChildContainerAdded, element);
       p.addChild(element);
       return true;
     }
