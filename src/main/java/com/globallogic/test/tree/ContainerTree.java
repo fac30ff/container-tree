@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 public class ContainerTree<T> extends ObservableContainer<T> {
   private Container<T> root;
+  private transient volatile int size;
 
   public ContainerTree() {
   }
