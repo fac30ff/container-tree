@@ -20,7 +20,6 @@ public class ContainerTree<T> extends ObservableContainer<T> {
   private Container<T> root;
 
   public ContainerTree() {
-    root = new Container<>();
   }
 
   private ContainerTree(Container<T> t) {
