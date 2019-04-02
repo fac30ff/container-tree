@@ -1,6 +1,7 @@
 package com.globallogic.test.tree;
 
 import com.globallogic.test.tree.exception.CannotAcceptNullException;
+import com.globallogic.test.tree.exception.NoElementFoundException;
 import com.globallogic.test.tree.management.event.ObservableContainer;
 import com.globallogic.test.tree.management.search.SearchEngineInterface;
 import com.globallogic.test.tree.management.event.constants.TreeEvent;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ContainerTree<T> extends ObservableContainer<T> {
   private Container<T> root;
@@ -140,7 +142,7 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
   public ContainerTree<T> subTree(T element) {
     Objects.requireNonNull(element, new CannotAcceptNullException().getMessage());
-    if(root == null) {
+    if (root == null) {
       return null;
     }
     if (root.getObject().equals(element)) {
@@ -160,6 +162,28 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
   private List<Container<T>> allChildren(Container<T> current, List<Container<T>> list) {
     return Collections.emptyList();
+  }
+
+  private List<Container<T>> allContainersFromTree(ContainerTree<T> containerTree) {
+    ArrayList<Container<T>> t = new ArrayList<>();
+    if (containerTree.root == null) {
+      return Collections.emptyList();
+    }
+    Container<T> c = containerTree.root;
+    while (c.hasParent()) {
+      c = c.getParent();
+    }
+    t.add(c);
+    Queue<Container<T>> queue = new LinkedList<>();
+    queue.add(c);
+    while (!queue.isEmpty()) {
+      Container<T> poll = queue.poll();
+      t.add(poll);
+      if (!poll.isLeaf()) {
+        queue.addAll(poll.getChildren());
+      }
+    }
+    return t;
   }
 
 
@@ -312,18 +336,52 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
     @Override
     public List<T> subElements(T t) {
-      Container<T> p = traverseToMainRoot(t);
-      LinkedList
+      Objects.requireNonNull(t, new CannotAcceptNullException().getMessage());
+      Container<T> p = traverseToMainRoot(root, t);
+      Queue<Container<T>> queue = new LinkedList<>();
+      ArrayList<T> res = new ArrayList<>();
+      queue.add(p);
+      while (!queue.isEmpty()) {
+        Container<T> poll = queue.poll();
+        if (!poll.getChildren().isEmpty()) {
+          queue.addAll(poll.getChildren());
+          poll.getChildren().forEach(e -> res.add(e.getObject()));
+        }
+      }
+      return res;
     }
 
     @Override
-    public List<T> filter(Predicate<T> t) {
-      return null;
+    public List<T> filter(Predicate<? super T> t) {
+      Objects.requireNonNull(t, new CannotAcceptNullException().getMessage());
+      return allObjectsFromTree(allContainersFromTree(ContainerTree.this)).stream().filter(t).collect(Collectors.toList());
+    }
+
+    public List<T> filter(Predicate<? super T> t, ContainerTree<T> tree) {
+      Objects.requireNonNull(t, new CannotAcceptNullException().getMessage());
+      Objects.requireNonNull(tree, new CannotAcceptNullException().getMessage());
+      return allObjectsFromTree(allContainersFromTree(tree)).stream().filter(t).collect(Collectors.toList());
+    }
+
+    private List<T> allObjectsFromTree(List<Container<T>> containers) {
+      ArrayList<T> t = new ArrayList<>();
+      containers.forEach(e -> t.add(e.getObject()));
+      return t;
+    }
+
+    private List<Container<T>> allContainersFromTree(ContainerTree<T> tree) {
+      return ContainerTree.this.allContainersFromTree(tree);
     }
 
     @Override
-    public T search(T t) {
-      return null;
+    public T search(final T t) throws NoElementFoundException {
+      Objects.requireNonNull(t, new CannotAcceptNullException().getMessage());
+      return allObjectsFromTree(allContainersFromTree(ContainerTree.this)).stream().filter(e -> e.equals(t)).findFirst().orElseThrow(NoElementFoundException::new);
+    }
+
+    public T search(final T t, ContainerTree<T> tree) throws NoElementFoundException {
+      Objects.requireNonNull(t, new CannotAcceptNullException().getMessage());
+      return allObjectsFromTree(allContainersFromTree(tree)).stream().filter(e -> e.equals(t)).findFirst().orElseThrow(NoElementFoundException::new);
     }
   }
 }
