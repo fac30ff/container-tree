@@ -33,7 +33,6 @@ public class ContainerTree<T> extends ObservableContainer<T> {
       return false;
     }
     if (root == null) {
-      propertyChanged(element, TreeEvent.NewRootContainerAdded, element);
       return add(element);
     }
     Container<T> p = traverseToMainRoot(root, parent);
@@ -89,9 +88,11 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
   private Container<T> add(Container<T> current, T element) throws AddingChildIsProhibitedForThisNodeException {
     if (current == null) {
+      propertyChanged(element, TreeEvent.NewRootContainerAdded, element);
       return new Container<>(element);
     }
     if (current.allowAddChildren()) {
+      propertyChanged(current.getObject(), TreeEvent.NewChildContainerAdded, element);
       current.children.add(new Container<>(current, element));
     } else {
       throw new AddingChildIsProhibitedForThisNodeException();
@@ -99,18 +100,33 @@ public class ContainerTree<T> extends ObservableContainer<T> {
     return current;
   }
 
+  public void clear() {
+
+    if (root != null && root.isRoot()) {
+      propertyChanged(root.getObject(), TreeEvent.ContainerTreeCleared, null);
+      root.removeSelf();
+    }
+    root = traverseToMainRoot(root, root.getObject());
+    propertyChanged(root.getObject(), TreeEvent.ContainerTreeCleared, null);
+    root.removeSelf();
+  }
+
   public T remove(T element) {
+    Objects.requireNonNull(element, new CannotAcceptNullException().getMessage());
     if (root == null) {
       return null;
     }
     if (root.object.equals(element)) {
+      propertyChanged(root.getObject(), TreeEvent.ElementDeleted, null);
       root.removeSelf();
     } else {
       if (root.parent == null) {
         root = traverseLevelOrder(root, element);
+        propertyChanged(root.getObject(), TreeEvent.ElementDeleted, null);
         root.removeSelf();
       } else {
         root = traverseToMainRoot(root, element);
+        propertyChanged(root.getObject(), TreeEvent.ElementDeleted, null);
         root.removeSelf();
       }
     }
