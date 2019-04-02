@@ -23,9 +23,14 @@ public class ContainerTree<T> extends ObservableContainer<T> {
     root = new Container<>();
   }
 
-  public ContainerTree(Container<T> t) {
+  private ContainerTree(Container<T> t) {
     this.root = t;
   }
+
+  public ContainerTree(T t) {
+    root = new Container<>(t);
+  }
+
 
   public boolean insert(T parent, T element) throws AddingChildIsProhibitedForThisNodeException {
     if (parent == null || element == null) {
