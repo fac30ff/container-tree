@@ -1,5 +1,6 @@
 package com.globallogic.test.tree;
 
+import com.globallogic.test.tree.exception.CannotAcceptNullException;
 import com.globallogic.test.tree.management.event.ObservableContainer;
 import com.globallogic.test.tree.management.search.SearchEngineInterface;
 import com.globallogic.test.tree.management.event.constants.TreeEvent;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.function.Predicate;
 
@@ -137,6 +139,7 @@ public class ContainerTree<T> extends ObservableContainer<T> {
   }
 
   public ContainerTree<T> subTree(T element) {
+    Objects.requireNonNull(element, new CannotAcceptNullException().getMessage());
     if(root == null) {
       return null;
     }
@@ -147,7 +150,7 @@ public class ContainerTree<T> extends ObservableContainer<T> {
     if (p == null) {
       return null;
     }
-    p.setParent(null);
+    p.changeParent(null);
     return new ContainerTree<>(p);
   }
 
@@ -204,6 +207,19 @@ public class ContainerTree<T> extends ObservableContainer<T> {
 
     void setParent(Container<T> parent) {
       this.parent = parent;
+    }
+
+    void changeParent(Container<T> newParent) {
+      if (this.getParent() == null) {
+        this.setParent(newParent);
+      }
+      Container<T> p = this.getParent();
+      p.removeChild(this);
+      this.setParent(newParent);
+    }
+
+    private void removeChild(Container<T> child) {
+      children.remove(child);
     }
 
     List<Container<T>> getChildren() {
@@ -269,29 +285,35 @@ public class ContainerTree<T> extends ObservableContainer<T> {
       Container<T> temp = this;
       this.parent = null;
       this.object = null;
-      removeChild(this.children);
+      removeChildren(this.children);
       return temp;
     }
 
-    private void removeChild(List<Container<T>> children) {
+    private void removeChildren(List<Container<T>> children) {
       if (children != null && children.isEmpty()) {
-        children.forEach(e -> removeChild(Collections.singletonList(e.removeSelf())));
+        children.forEach(e -> removeChildren(Collections.singletonList(e.removeSelf())));
       }
     }
 
     boolean hasParent() {
       return parent != null;
     }
+
+    private boolean isLeaf() {
+      return getChildren() == null || getChildren().isEmpty();
+    }
+
+    private boolean isRoot() {
+      return getParent() == null;
+    }
   }
 
-  private class ContainerSearchEngine<T> implements SearchEngineInterface<T> {
+  private class ContainerSearchEngine implements SearchEngineInterface<T> {
 
     @Override
-    public List<T> subTree(T t) {
-      ArrayList<T> list = new ArrayList<>();
-      List<Container<T>> containers = allChildren(t);
-      containers.forEach(e -> list.add(e.getObject()));
-      return list;
+    public List<T> subElements(T t) {
+      Container<T> p = traverseToMainRoot(t);
+      LinkedList
     }
 
     @Override
